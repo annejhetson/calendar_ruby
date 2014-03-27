@@ -28,6 +28,8 @@ def main_menu
       delete_event
     when 'l'
       list_events
+    when 's'
+      list_event_menu
     when 'e'
       edit_events
     when 'x'
@@ -43,6 +45,7 @@ def print_options
   puts "Press 'A' to Add a New Event",
        "Press 'D' to Delete an Event",
        "Press 'L' to List your Events",
+       "Press 'S' to List Event Menu"
        "Press 'E' to Edit an Event"
 end
 
@@ -75,8 +78,11 @@ def delete_event
 end
 
 def list_events
-  Event.all.each do |event|
-    puts "#{event.description}: #{event.location}: #{event.start}"
+  binding.pry
+  Event.order(:start).each do |event|
+    if Time.now < event.start
+      puts "#{event.description}: #{event.location}: #{event.start}"
+    end
   end
 end
 
@@ -104,6 +110,77 @@ def edit_events
   puts "#{current_event.description} has been updated!"
   main_menu
 end
+
+## ==== LIST EVENT MENU ====##
+def list_event_menu
+  choice = nil
+  until choice == 'x'
+    puts "\n==== LIST EVENT MENU ===="
+    puts "Press 'A' to List All Events",
+         "Press 'O' to List Past Events",
+         "Press 'D' to List Events Today",
+         "Press 'W' to List Events this Week",
+         "Press 'M' to List Events this Month",
+         "Press 'X' to go back to Main Menu",
+    choice = prompt('Enter choice')
+    case choice
+    when 'a'
+      list_all
+    when 'o'
+      list_history
+    when 'd'
+      list_today_events
+    when 'w'
+      list_week_events
+    when 'm'
+      list_month_events
+    when 'x'
+      main_menu
+    else
+      clear
+      error
+    end
+  end
+end
+
+def list_all
+  Event.all.each do |event|
+    puts "#{event.description}: #{event.location}: #{event.start}"
+  end
+end
+
+def list_history
+  Event.order(:start).each do |event|
+    if Time.now > event.start
+      puts "#{event.description}: #{event.location}: #{event.start}"
+    end
+  end
+end
+
+def list_today_events
+  Event.all.each do |event|
+    if event.start.to_s[0..9] == Date.today.to_s
+      puts "#{event.description}: #{event.location}: #{event.start}"
+    end
+  end
+end
+
+def list_month_events
+  Event.order(:start).each do |event|
+    if event.start.to_s[0..6] == Date.today.to_s[0..6] && Time.now > event.start
+      puts "#{event.description}: #{event.location}: #{event.start}"
+    end
+  end
+end
+
+def list_week_events
+  Event.order(:start).each do |event|
+    if Date.today <= event.start && event.start <= (Date.today + (7 - Date.today.wday))
+      puts "#{event.description}: #{event.location}: #{event.start}"
+    end
+  end
+end
+
 
 ##==== OTHERS ====##
 
