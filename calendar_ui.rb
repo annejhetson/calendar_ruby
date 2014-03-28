@@ -58,7 +58,7 @@ def add_event
   start = prompt("Enter start date and time in YYYY/MM/DD HH:MM")
   end_event = prompt("Enter end date and time in YYYY/MM/DD HH:MM")
 
-  new_event = Event.create({description: description, location: location, start: start, :end => end_event })
+  new_event = Event.create({description: description, location: location, start: start, :end => end_event, :calendar_id => })
     # if new_event.future_check.first == "End time must be before start time"
     #   puts "#{new_event.future_check.first}"
     #   sleep(2)
@@ -121,7 +121,7 @@ def list_event_menu
          "Press 'D' to List Events Today",
          "Press 'W' to List Events this Week",
          "Press 'M' to List Events this Month",
-         "Press 'X' to go back to Main Menu",
+         "Press 'X' to go back to Main Menu"
     choice = prompt('Enter choice')
     case choice
     when 'a'
@@ -160,7 +160,40 @@ end
 def list_today_events
   Event.all.each do |event|
     if event.start.to_s[0..9] == Date.today.to_s
+      puts "\n==================#{event.start.to_s[0..9]}======================="
       puts "#{event.description}: #{event.location}: #{event.start}"
+     puts "=======================================================\n"
+
+    end
+  end
+  choice = nil
+  i = 0
+  until choice == 'x'
+    choice = prompt("Press 'p' to see the events from the previous day or 'n' to see from the next day press 'x' when finished")
+    case choice
+    when 'p'
+      i -= 1
+      Event.all.each do |event|
+        if event.start.to_s[0..9] == (Date.today + i).to_s
+        puts "\n==================#{event.start.to_s[0..9]}======================="
+        puts "#{event.description}: #{event.location}: #{event.start}"
+        puts "=======================================================\n"
+        end
+      end
+
+    when 'n'
+      i += 1
+      Event.all.each do |event|
+        if event.start.to_s[0..9] == (Date.today + i).to_s
+        puts "\n==================#{event.start.to_s[0..9]}======================="
+        puts "#{event.description}: #{event.location}: #{event.start}"
+        puts "=======================================================\n"
+        end
+      end
+    else
+      clear
+      error
+      list_today_events
     end
   end
 end
